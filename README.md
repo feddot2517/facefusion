@@ -1,3 +1,88 @@
+# Fork
+Added REST API integration:
+
+```
+$ python facefusion.py api-run
+```
+
+for settings params look at facefusion/api.py
+
+## Javscript Client
+
+```typescript
+import axios from 'axios';
+import FormData from 'form-data';
+import { FaceFusionParams, FaceFusionError } from '../types';
+
+export class FaceFusionService {
+  private baseUrl: string;
+
+  constructor(baseUrl: string = 'http://127.0.0.1:8081') {
+    this.baseUrl = baseUrl;
+  }
+
+  async checkHealth(): Promise<boolean> {
+    try {
+      const response = await axios.get(`${this.baseUrl}/health`);
+      return response.data.status === 'healthy';
+    } catch (error) {
+      console.error('Health check failed:', error);
+      return false;
+    }
+  }
+
+  async processImages(
+    sourceFile: Buffer,
+    targetFile: Buffer,
+    params?: FaceFusionParams,
+  ): Promise<Buffer | FaceFusionError> {
+    try {
+      const formData = new FormData();
+
+      // Добавляем файлы в formData
+      formData.append('source', sourceFile, {
+        filename: 'source.jpg',
+        contentType: 'image/jpeg',
+      });
+
+      formData.append('target', targetFile, {
+        filename: 'target.jpg',
+        contentType: 'image/jpeg',
+      });
+
+      // Если есть дополнительные параметры, добавляем их
+      if (params) {
+        formData.append('params', JSON.stringify(params));
+      }
+
+      const response = await axios.post(`${this.baseUrl}/process`, formData, {
+        headers: {
+          ...formData.getHeaders(),
+        },
+        responseType: 'arraybuffer',
+        validateStatus: status => status < 500,
+      });
+
+      if (response.status !== 200) {
+        // Если ошибка, преобразуем ответ в текст и парсим как JSON
+        const errorText = new TextDecoder().decode(response.data);
+        const errorJson = JSON.parse(errorText);
+        return errorJson as FaceFusionError;
+      }
+
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error('Processing failed:', error);
+      return {
+        error: 'Processing failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+}
+
+```
+
 FaceFusion
 ==========
 
