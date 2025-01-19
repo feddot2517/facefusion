@@ -80,6 +80,27 @@ def route(args : Args) -> None:
 			hard_exit(1)
 		error_core = process_batch(args)
 		hard_exit(error_core)
+	if state_manager.get_item('command') == 'api-run':
+		from facefusion.api import run_api
+
+		if not common_pre_check() or not processors_pre_check():
+			return conditional_exit(2)
+
+		# Инициализируем систему jobs
+		if not job_manager.init_jobs(state_manager.get_item('jobs_path')):
+			hard_exit(1)
+
+		# Получаем host и port из state_manager или используем дефолтные значения
+		host = state_manager.get_item('host')
+		if host is None:
+			host = '0.0.0.0'
+
+		port = state_manager.get_item('port')
+		if port is None:
+			port = 8081
+
+		# Запускаем API сервер
+		run_api(host=host, port=port)
 	if state_manager.get_item('command') in [ 'job-run', 'job-run-all', 'job-retry', 'job-retry-all' ]:
 		if not job_manager.init_jobs(state_manager.get_item('jobs_path')):
 			hard_exit(1)

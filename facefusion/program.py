@@ -263,6 +263,12 @@ def collect_step_program() -> ArgumentParser:
 def collect_job_program() -> ArgumentParser:
 	return ArgumentParser(parents= [ create_execution_program(), create_download_providers_program(), create_memory_program(), create_misc_program() ], add_help = False)
 
+def create_api_program() -> ArgumentParser:
+    program = ArgumentParser(add_help = False)
+    group_api = program.add_argument_group('api')
+    group_api.add_argument('--host', help = 'API server host', default = '0.0.0.0')
+    group_api.add_argument('--port', help = 'API server port', type=int, default = 5000)
+    return program
 
 def create_program() -> ArgumentParser:
 	program = ArgumentParser(formatter_class = create_help_formatter_large, add_help = False)
@@ -290,6 +296,7 @@ def create_program() -> ArgumentParser:
 	sub_program.add_parser('job-run-all', help = wording.get('help.job_run_all'), parents = [ create_config_path_program(), create_temp_path_program(), create_jobs_path_program(), collect_job_program() ], formatter_class = create_help_formatter_large)
 	sub_program.add_parser('job-retry', help = wording.get('help.job_retry'), parents = [ create_job_id_program(), create_config_path_program(), create_temp_path_program(), create_jobs_path_program(), collect_job_program() ], formatter_class = create_help_formatter_large)
 	sub_program.add_parser('job-retry-all', help = wording.get('help.job_retry_all'), parents = [ create_config_path_program(), create_temp_path_program(), create_jobs_path_program(), collect_job_program() ], formatter_class = create_help_formatter_large)
+	sub_program.add_parser('api-run', help='run the program in API mode', parents=[create_config_path_program(), create_temp_path_program(), create_jobs_path_program(), create_api_program(), collect_step_program(), collect_job_program() ], formatter_class=create_help_formatter_large )
 	return ArgumentParser(parents = [ program ], formatter_class = create_help_formatter_small, add_help = True)
 
 

@@ -182,7 +182,7 @@ File = TypedDict('File',
 	'path': str
 })
 
-AppContext = Literal['cli', 'ui']
+AppContext = Literal['cli', 'ui', 'api']  # Добавляем 'api'
 
 InferencePool = Dict[str, InferenceSession]
 InferencePoolSet = Dict[AppContext, Dict[str, InferencePool]]
@@ -215,6 +215,9 @@ ApplyStateItem = Callable[[Any, Any], None]
 StateKey = Literal\
 [
 	'command',
+	'host',  # Добавляем новые параметры
+	'port',  # Добавляем новые параметры
+	'config_path',
 	'config_path',
 	'temp_path',
 	'jobs_path',
@@ -278,6 +281,8 @@ StateKey = Literal\
 State = TypedDict('State',
 {
 	'command' : str,
+	'host': str,
+    'port': int,
 	'config_path' : str,
 	'temp_path' : str,
 	'jobs_path' : str,
@@ -339,3 +344,4 @@ State = TypedDict('State',
 	'step_index' : int
 })
 StateSet = Dict[AppContext, State]
+
